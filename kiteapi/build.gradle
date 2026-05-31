@@ -5,9 +5,10 @@ plugins {
 }
 
 dependencies {
+    implementation project(':strategy')
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'com.zerodhatech.kiteconnect:kiteconnect:4.0.0'
     implementation 'io.github.cdimascio:java-dotenv:5.2.2'
-    
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

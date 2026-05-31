@@ -1,0 +1,14 @@
+.git
+.gitignore
+.gitattributes
+.gradle/
+build/
+node_modules/
+*.md
+.env
+.env.example
+.idea/
+.gemini/
+graphify-out/
+**/build/
+**/.gradle/

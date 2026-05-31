@@ -12,4 +12,3 @@ plugins {
 
 rootProject.name = 'option-selling'
 include('kiteapi')
-include('strategy')

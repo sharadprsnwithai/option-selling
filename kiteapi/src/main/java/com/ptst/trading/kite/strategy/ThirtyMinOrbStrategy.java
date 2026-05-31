@@ -101,8 +101,6 @@ public class ThirtyMinOrbStrategy {
     try {
       if (!positionEntered) {
         checkBreakoutEntry();
-      } else {
-        monitorPosition();
       }
     } catch (Throwable t) {
       log.error("Error in checkConditions", t);
@@ -140,7 +138,12 @@ public class ThirtyMinOrbStrategy {
    * @throws KiteException if market data fetching fails
    * @throws IOException if a network error occurs
    */
+  @Scheduled(fixedRate = 5000)
   private void monitorPosition() throws KiteException, IOException {
+
+    if (!positionEntered) {
+      return;
+    }
     double currentPremium = this.marketDataService.getOptionPremium(optionTradingSymbol);
     double pnlPercent = (entryPremium - currentPremium) / entryPremium * 100;
 

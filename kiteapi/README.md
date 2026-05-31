@@ -167,9 +167,11 @@ kiteapi/
 │   │   │   ├── strategy/
 │   │   │   │   └── ThirtyMinOrbStrategy.java          # 30-min ORB strategy
 │   │   │   └── util/
-│   │   │       └── AppUtils.java                      # Shared constants
+│   │   │       ├── AppUtils.java                      # Shared constants
+│   │   │       └── LogCodes.java                      # Structured log message codes
 │   │   └── resources/
-│   │       └── application.properties
+│   │       ├── application.properties
+│   │       └── logback-spring.xml                     # Logback configuration
 │   └── test/
 │       └── java/com/ptst/trading/kite/
 │           ├── controller/
@@ -232,3 +234,65 @@ The **Gradle Versions Plugin** (`com.github.ben-manes.versions`) helps keep depe
 # Check for available updates (excludes alpha/beta/rc pre-release versions)
 ./gradlew dependencyUpdates
 ```
+
+## Docker
+
+A multi-stage `Dockerfile` is provided at the project root.
+
+```bash
+# Build the image
+docker build -t kiteapi .
+
+# Run (with env file)
+docker run -p 8080:8080 --env-file kiteapi/.env kiteapi
+
+# Run (with env vars)
+docker run -p 8080:8080 \
+  -e KITE_API_KEY=your_key \
+  -e KITE_API_SECRET=your_secret \
+  -e KITE_USER_ID=your_id \
+  kiteapi
+```
+
+The image uses:
+- **Build stage:** `gradle:8.13-jdk21` — compiles and packages the app
+- **Runtime:** `eclipse-temurin:21-jre-slim` — minimal JRE
+- **ZGC** garbage collector with 75% max RAM
+- **Non-root** `trading` user
+- Logs written to `/app/logs/` inside the container
+
+## Logging
+
+Structured logging via **Logback** (`logback-spring.xml`) with three appenders:
+
+| Appender | Target | Retention |
+|---|---|---|
+| **CONSOLE** | stdout (colored) | — |
+| **FILE** | `logs/kiteapi.log` | 30 days / 1 GB |
+| **ERROR_FILE** | `logs/kiteapi-error.log` | 90 days / 500 MB |
+
+Log levels by Spring profile:
+
+| Profile | `com.ptst.trading` | Root |
+|---|---|---|
+| `dev` (default) | DEBUG | INFO |
+| `prod` | INFO | WARN |
+
+### Log Codes
+
+All services use standardized codes from `LogCodes.java` for consistent, searchable logs:
+
+```java
+log.info(LogCodes.ORB_ENTER_TRADE, side, symbol, premium, orderId);
+// [STRAT-ORB-004] Entering trade — side=PE, symbol=NIFTY02JUN2612345PE, premium=150.0, orderId=12345
+```
+
+**Code prefixes:**
+| Prefix | Module |
+|---|---|
+| `KITE-SESS` | Session & Authentication |
+| `KITE-MD` | Market Data |
+| `KITE-ORD` | Orders |
+| `KITE-POS` | Positions |
+| `STRAT-ORB` | ORB Strategy |
+| `SYS` | System / General |

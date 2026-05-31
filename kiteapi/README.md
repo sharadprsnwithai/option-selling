@@ -237,7 +237,23 @@ The **Gradle Versions Plugin** (`com.github.ben-manes.versions`) helps keep depe
 
 ## Docker
 
-A multi-stage `Dockerfile` is provided at the project root.
+### docker-compose (recommended)
+
+```bash
+# Start (uses kiteapi/.env automatically)
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Stop
+docker compose down
+
+# Rebuild after code changes
+docker compose build --no-cache
+```
+
+### Manual build
 
 ```bash
 # Build the image
@@ -259,7 +275,8 @@ The image uses:
 - **Runtime:** `eclipse-temurin:21-jre-slim` — minimal JRE
 - **ZGC** garbage collector with 75% max RAM
 - **Non-root** `trading` user
-- Logs written to `/app/logs/` inside the container
+- **Health check** via `/actuator/health`
+- Logs written to `/app/logs/` inside the container (persisted via Docker volume `kiteapi_logs`)
 
 ## Logging
 
